@@ -2,7 +2,9 @@ package com.example.store.service.impl;
 
 import com.example.store.dto.BookDto;
 import com.example.store.dto.CreateBookRequestDto;
+import com.example.store.exception.EntityNotFoundException;
 import com.example.store.mapper.BookMapper;
+import com.example.store.model.Book;
 import com.example.store.repository.BookRepository;
 import com.example.store.service.BookService;
 import java.util.List;
@@ -22,7 +24,10 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookDto findById(Long id) {
-        return bookMapper.toDto(bookRepository.findById(id));
+        Book book = bookRepository.findById(id).orElseThrow(()
+                -> new EntityNotFoundException("Cant find book by id: " + id)
+        );
+        return bookMapper.toDto(book);
     }
 
     @Override

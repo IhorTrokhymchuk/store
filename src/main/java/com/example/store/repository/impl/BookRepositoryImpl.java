@@ -3,10 +3,10 @@ package com.example.store.repository.impl;
 import com.example.store.model.Book;
 import com.example.store.repository.BookRepository;
 import java.util.List;
+import java.util.Optional;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -42,11 +42,10 @@ public class BookRepositoryImpl implements BookRepository {
     }
 
     @Override
-    public Book findById(Long id) {
+    public Optional<Book> findById(Long id) {
         try (Session session = sessionFactory.openSession()) {
-            Query<Book> bookById = session.createQuery("FROM Book b WHERE b.id = :id", Book.class);
-            bookById.setParameter("id", id);
-            return bookById.getSingleResult();
+            Book bookById = session.find(Book.class, id);
+            return Optional.ofNullable(bookById);
         }
     }
 
