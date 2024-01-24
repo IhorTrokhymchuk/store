@@ -4,11 +4,7 @@ import java.util.List;
 import com.example.store.model.Book;
 import com.example.store.service.BookService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -21,9 +17,13 @@ public class BookController {
         return bookService.findAll();
     }
 
+    @GetMapping("/{id}")
+    public Book findById(@PathVariable Long id) {
+        return bookService.findById(id);
+    }
+
     @PostMapping
     public Book save(@RequestBody Book book) {
         return bookService.save(book);
     }
-
 }

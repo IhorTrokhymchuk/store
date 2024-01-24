@@ -6,6 +6,7 @@ import java.util.List;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -37,6 +38,15 @@ public class BookRepositoryImpl implements BookRepository {
             if (session != null) {
                 session.close();
             }
+        }
+    }
+
+    @Override
+    public Book findById(Long id) {
+        try (Session session = sessionFactory.openSession()) {
+            Query<Book> bookById = session.createQuery("FROM Book b WHERE b.id = :id", Book.class);
+            bookById.setParameter("id", id);
+            return bookById.getSingleResult();
         }
     }
 
