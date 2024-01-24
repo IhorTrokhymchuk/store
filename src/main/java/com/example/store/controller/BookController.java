@@ -1,10 +1,18 @@
 package com.example.store.controller;
 
 import java.util.List;
-import com.example.store.model.Book;
+
+import com.example.store.dto.BookDto;
+
+import com.example.store.dto.CreateBookRequestDto;
 import com.example.store.service.BookService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
@@ -13,17 +21,17 @@ public class BookController {
     private final BookService bookService;
 
     @GetMapping
-    public List<Book> getAll() {
+    public List<BookDto> getAll() {
         return bookService.findAll();
     }
 
     @GetMapping("/{id}")
-    public Book findById(@PathVariable Long id) {
+    public BookDto findById(@PathVariable Long id) {
         return bookService.findById(id);
     }
 
     @PostMapping
-    public Book save(@RequestBody Book book) {
-        return bookService.save(book);
+    public BookDto save(@RequestBody CreateBookRequestDto requestDto) {
+        return bookService.save(requestDto);
     }
 }

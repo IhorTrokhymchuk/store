@@ -1,5 +1,6 @@
 package com.example.store.repository;
 
+import com.example.store.dto.BookDto;
 import com.example.store.model.Book;
 import java.util.List;
 
