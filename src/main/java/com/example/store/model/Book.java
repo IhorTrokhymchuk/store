@@ -1,11 +1,8 @@
 package com.example.store.model;
 
 import jakarta.persistence.*;
-
 import java.math.BigDecimal;
 import lombok.Data;
-
-import javax.print.attribute.standard.MediaSize;
 
 @Entity
 @Data
