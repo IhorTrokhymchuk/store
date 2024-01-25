@@ -3,6 +3,7 @@ package com.example.store.repository.impl;
 import com.example.store.model.Book;
 import com.example.store.repository.BookRepository;
 import java.util.List;
+import java.util.Optional;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -37,6 +38,16 @@ public class BookRepositoryImpl implements BookRepository {
             if (session != null) {
                 session.close();
             }
+        }
+    }
+
+    @Override
+    public Optional<Book> findById(Long id) {
+        try (Session session = sessionFactory.openSession()) {
+            Book bookById = session.find(Book.class, id);
+            return Optional.ofNullable(bookById);
+        } catch (Exception e) {
+            throw new RuntimeException("Cant find user where id: " + id, e);
         }
     }
 
