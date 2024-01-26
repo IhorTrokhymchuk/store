@@ -9,6 +9,7 @@ import com.example.store.repository.BookRepository;
 import com.example.store.service.BookService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -27,6 +28,21 @@ public class BookServiceImpl implements BookService {
         Book book = bookRepository.findById(id).orElseThrow(()
                 -> new EntityNotFoundException("Cant find book by id: " + id)
         );
+        return bookMapper.toDto(book);
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        bookRepository.deleteById(id);
+    }
+
+    @Override
+    public BookDto update(Long id, CreateBookRequestDto requestDto) {
+        Book book = bookRepository.findById(id).orElseThrow(
+                () -> new EntityNotFoundException("Cant find book by id: " + id)
+        );
+        BeanUtils.copyProperties(requestDto, book, "id", "isDeleted");
+        bookRepository.save(book);
         return bookMapper.toDto(book);
     }
 
