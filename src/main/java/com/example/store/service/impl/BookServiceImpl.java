@@ -38,8 +38,8 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookDto update(Long id, CreateBookRequestDto requestDto) {
-        Book book = bookRepository.findById(id).orElseThrow(()
-            -> new EntityNotFoundException("Cant find book by id: " + id)
+        Book book = bookRepository.findById(id).orElseThrow(
+                () -> new EntityNotFoundException("Cant find book by id: " + id)
         );
         BeanUtils.copyProperties(requestDto, book, "id", "isDeleted");
         bookRepository.save(book);
