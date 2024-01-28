@@ -1,12 +1,20 @@
 package com.example.store.dto;
 
-public record BookSearchParametersDto(
-        String[] titles,
-        String[] authors,
-        String[] isbns,
-        String[] prices,
-        String[] descriptions,
-        String[] coverImages,
-        String[] priceMin,
-        String[] priceMax) {
+import com.example.store.validation.ArrayNumericValues;
+import com.example.store.validation.ArraySizeAndNumericValues;
+import lombok.Data;
+
+@Data
+public class BookSearchParametersDto {
+    private String[] titles;
+    private String[] authors;
+    private String[] isbns;
+    @ArrayNumericValues
+    private String[] prices;
+    private String[] descriptions;
+    private String[] coverImages;
+    @ArraySizeAndNumericValues
+    private String[] priceMin;
+    @ArraySizeAndNumericValues
+    private String[] priceMax;
 }

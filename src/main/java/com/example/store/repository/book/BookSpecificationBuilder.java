@@ -18,60 +18,60 @@ public class BookSpecificationBuilder implements SpecificationBuilder<Book> {
     public Specification<Book> build(BookSearchParametersDto bookSearchParametersDto) {
         Specification<Book> specs = Specification.where(null);
 
-        if (bookSearchParametersDto.titles() != null
-                && bookSearchParametersDto.titles().length > 0) {
+        if (bookSearchParametersDto.getTitles() != null
+                && bookSearchParametersDto.getTitles().length > 0) {
             specs = specs.and(
                 bookSpecificationProviderManager.getSpecificationProvider("title")
-                    .getSpecification(bookSearchParametersDto.titles())
+                    .getSpecification(bookSearchParametersDto.getTitles())
             );
         }
-        if (bookSearchParametersDto.authors() != null
-                && bookSearchParametersDto.authors().length > 0) {
+        if (bookSearchParametersDto.getAuthors() != null
+                && bookSearchParametersDto.getAuthors().length > 0) {
             specs = specs.and(
                 bookSpecificationProviderManager.getSpecificationProvider("author")
-                    .getSpecification(bookSearchParametersDto.authors())
+                    .getSpecification(bookSearchParametersDto.getAuthors())
             );
         }
-        if (bookSearchParametersDto.isbns() != null
-                && bookSearchParametersDto.isbns().length > 0) {
+        if (bookSearchParametersDto.getIsbns() != null
+                && bookSearchParametersDto.getIsbns().length > 0) {
             specs = specs.and(
                 bookSpecificationProviderManager.getSpecificationProvider("isbn")
-                    .getSpecification(bookSearchParametersDto.isbns())
+                    .getSpecification(bookSearchParametersDto.getIsbns())
             );
         }
-        if (bookSearchParametersDto.prices() != null
-                && bookSearchParametersDto.prices().length > 0) {
+        if (bookSearchParametersDto.getPrices() != null
+                && bookSearchParametersDto.getPrices().length > 0) {
             specs = specs.and(
                 bookSpecificationProviderManager.getSpecificationProvider("price")
-                    .getSpecification(bookSearchParametersDto.prices())
+                    .getSpecification(bookSearchParametersDto.getPrices())
             );
         }
-        if (bookSearchParametersDto.descriptions() != null
-                && bookSearchParametersDto.descriptions().length > 0) {
+        if (bookSearchParametersDto.getDescriptions() != null
+                && bookSearchParametersDto.getDescriptions().length > 0) {
             specs = specs.and(
                 bookSpecificationProviderManager.getSpecificationProvider("description")
-                    .getSpecification(bookSearchParametersDto.descriptions())
+                    .getSpecification(bookSearchParametersDto.getDescriptions())
             );
         }
-        if (bookSearchParametersDto.coverImages() != null
-                && bookSearchParametersDto.coverImages().length > 0) {
+        if (bookSearchParametersDto.getCoverImages() != null
+                && bookSearchParametersDto.getCoverImages().length > 0) {
             specs = specs.and(
                 bookSpecificationProviderManager.getSpecificationProvider("coverImage")
-                    .getSpecification(bookSearchParametersDto.coverImages())
+                    .getSpecification(bookSearchParametersDto.getCoverImages())
             );
         }
-        if (bookSearchParametersDto.priceMin() != null
-                && bookSearchParametersDto.priceMin().length > 0) {
+        if (bookSearchParametersDto.getPriceMin() != null
+                && bookSearchParametersDto.getPriceMin().length > 0) {
             specs = specs.and(
                 bookSpecificationProviderManager.getSpecificationProvider("priceMin")
-                    .getSpecification(bookSearchParametersDto.priceMin())
+                    .getSpecification(bookSearchParametersDto.getPriceMin())
             );
         }
-        if (bookSearchParametersDto.priceMax() != null
-                && bookSearchParametersDto.priceMax().length > 0) {
+        if (bookSearchParametersDto.getPriceMax() != null
+                && bookSearchParametersDto.getPriceMax().length > 0) {
             specs = specs.and(
                 bookSpecificationProviderManager.getSpecificationProvider("priceMax")
-                    .getSpecification(bookSearchParametersDto.priceMax())
+                    .getSpecification(bookSearchParametersDto.getPriceMax())
             );
         }
 
