@@ -39,9 +39,14 @@ public class BookServiceImpl implements BookService {
     public List<BookDto> search(BookSearchParametersDto bookSearchParametersDto) {
         Specification<Book> bookSpecification
                 = bookSpecificationBuilder.build(bookSearchParametersDto);
-        return bookRepository.findAll(bookSpecification).stream()
-            .map(bookMapper::toDto)
-            .toList();
+        List<BookDto> bookDtoList = bookRepository.findAll(bookSpecification).stream()
+                .map(bookMapper::toDto)
+                .toList();
+        if (bookDtoList.isEmpty()) {
+            throw new EntityNotFoundException("Cant find books with parametrs: "
+                + bookSearchParametersDto.toString());
+        }
+        return bookDtoList;
     }
 
     @Override
@@ -61,8 +66,12 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public List<BookDto> findAll() {
-        return bookRepository.findAll().stream()
-            .map(bookMapper::toDto)
-            .toList();
+        List<BookDto> bookDtoList = bookRepository.findAll().stream()
+                .map(bookMapper::toDto)
+                .toList();
+        if (bookDtoList.isEmpty()) {
+            throw new EntityNotFoundException("Cant find books");
+        }
+        return bookDtoList;
     }
 }
