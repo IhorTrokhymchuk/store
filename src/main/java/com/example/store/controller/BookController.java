@@ -1,8 +1,8 @@
 package com.example.store.controller;
 
-import com.example.store.dto.BookDto;
-import com.example.store.dto.BookSearchParametersDto;
-import com.example.store.dto.CreateBookRequestDto;
+import com.example.store.dto.book.BookDto;
+import com.example.store.dto.book.BookSearchParametersDto;
+import com.example.store.dto.book.CreateBookRequestDto;
 import com.example.store.service.BookService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

@@ -1,8 +1,9 @@
 package com.example.store.service.impl;
 
-import com.example.store.dto.BookDto;
-import com.example.store.dto.BookSearchParametersDto;
-import com.example.store.dto.CreateBookRequestDto;
+import com.example.store.dto.book.BookDto;
+import com.example.store.dto.book.BookSearchParametersDto;
+import com.example.store.dto.book.CreateBookRequestDto;
+import com.example.store.exception.EntityAlreadyExistsException;
 import com.example.store.exception.EntityNotFoundException;
 import com.example.store.mapper.BookMapper;
 import com.example.store.model.Book;
@@ -25,6 +26,10 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookDto save(CreateBookRequestDto requestDto) {
+        if (bookRepository.findBookByIsbn(requestDto.getIsbn()).isPresent()) {
+            throw new EntityAlreadyExistsException("Book with isbn:"
+                    + requestDto.getIsbn() + " is created");
+        }
         return bookMapper.toDto(bookRepository.save(bookMapper.toModel(requestDto)));
     }
 

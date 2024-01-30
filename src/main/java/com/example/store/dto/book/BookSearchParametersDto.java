@@ -1,4 +1,4 @@
-package com.example.store.dto;
+package com.example.store.dto.book;
 
 import com.example.store.validation.ArrayNumericValues;
 import com.example.store.validation.ArraySizeAndNumericValues;
