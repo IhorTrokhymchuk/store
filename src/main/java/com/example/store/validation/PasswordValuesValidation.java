@@ -14,6 +14,9 @@ public class PasswordValuesValidation implements ConstraintValidator<PasswordVal
     @Override
     public boolean isValid(String password,
                            ConstraintValidatorContext constraintValidatorContext) {
+        if (password == null) {
+            return false;
+        }
         Matcher matcher = pattern.matcher(password);
         return matcher.matches();
     }
