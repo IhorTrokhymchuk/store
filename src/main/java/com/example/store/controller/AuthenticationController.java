@@ -24,6 +24,6 @@ public class AuthenticationController {
     @Operation(summary = "Register user", description = "Register a new user")
     public UserResponseDto register(@RequestBody @Valid UserRegistrationRequestDto requestDto)
             throws RegistrationException {
-        return userService.save(requestDto);
+        return userService.register(requestDto);
     }
 }
