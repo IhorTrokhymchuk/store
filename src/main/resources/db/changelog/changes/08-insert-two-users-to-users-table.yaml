@@ -1,0 +1,109 @@
+databaseChangeLog:
+  - changeSet:
+      id: insert-users
+      author: IhorTrokhymchuk
+      changes:
+        - preConditions:
+            onFail: MARK_RAN
+            sqlCheck:
+              expectedResult: 0
+              sql: SELECT COUNT(*) FROM users WHERE email = 'aliceadmin@excemple.com'
+          insert:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: 1
+              - column:
+                  name: email
+                  value: 'aliceadmin@excemple.com'
+              - column:
+                  name: password
+                  value: '$2a$10$.vMBGY6p5/5EIB8K00NjV.8BgqThUcATrFLajZvfTFZ0d0TuOFajy'
+              - column:
+                  name: first_name
+                  value: 'alice'
+              - column:
+                  name: last_name
+                  value: 'ali'
+              - column:
+                  name: shipping_address
+                  value: null
+              - column:
+                  name: is_deleted
+                  value: 0
+
+        - preConditions:
+            onFail: MARK_RAN
+            sqlCheck:
+              expectedResult: 0
+              sql: SELECT COUNT(*) FROM users WHERE email = 'alice2@excemple.com'
+          insert:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: 2
+              - column:
+                  name: email
+                  value: 'alice2@excemple.com'
+              - column:
+                  name: password
+                  value: '$2a$10$qOM3rVWjCqa4T7ucIfL5zOVKI9xWTl0NNlouCUXqZ1qPDlB2m70pe'
+              - column:
+                  name: first_name
+                  value: 'alice'
+              - column:
+                  name: last_name
+                  value: 'ali'
+              - column:
+                  name: shipping_address
+                  value: null
+              - column:
+                  name: is_deleted
+                  value: 0
+
+        - preConditions:
+              onFail: MARK_RAN
+              sqlCheck:
+                expectedResult: 0
+                sql: SELECT COUNT(*) FROM users_roles WHERE user_id = 1 AND role_id = 1
+          insert:
+            tableName: users_roles
+            columns:
+              - column:
+                  name: user_id
+                  valueNumeric: 1
+              - column:
+                  name: role_id
+                  valueNumeric: 1
+
+        - preConditions:
+            onFail: MARK_RAN
+            sqlCheck:
+              expectedResult: 0
+              sql: SELECT COUNT(*) FROM users_roles WHERE user_id = 1 AND role_id = 2
+          insert:
+            tableName: users_roles
+            columns:
+              - column:
+                  name: user_id
+                  valueNumeric: 1
+              - column:
+                  name: role_id
+                  valueNumeric: 2
+
+        - preConditions:
+            onFail: MARK_RAN
+            sqlCheck:
+              expectedResult: 0
+              sql: SELECT COUNT(*) FROM users_roles WHERE user_id = 2 AND role_id = 1
+          insert:
+            tableName: users_roles
+            columns:
+              - column:
+                  name: user_id
+                  valueNumeric: 2
+              - column:
+                  name: role_id
+                  valueNumeric: 1

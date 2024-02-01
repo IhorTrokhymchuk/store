@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 03-add-idDeleted-column-to-users-table
+      id: add-idDeleted-column-to-users-table
       author: IhorTrokhymchuk
       changes:
         - addColumn:

@@ -9,6 +9,7 @@ databaseChangeLog:
               - column:
                   name: user_id
                   type: bigint
+                  defaultValue:
                   constraints:
                     nullable: false
               - column:

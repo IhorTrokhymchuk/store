@@ -11,6 +11,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +30,7 @@ public class BookController {
     private final BookService bookService;
 
     @GetMapping
+    @PreAuthorize("hasRole('USER')")
     @Operation(summary = "Get all books",
             description = "Get a page of all available books and can use sort")
     public List<BookDto> getAll(Pageable pageable) {
@@ -36,12 +38,14 @@ public class BookController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     @Operation(summary = "Get book by id", description = "Get a available book by id")
     public BookDto findById(@PathVariable Long id) {
         return bookService.findById(id);
     }
 
     @GetMapping("/search")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     @Operation(summary = "Get books by parametrs",
             description = "Get a page of available books by parametrs and can use sort")
     public List<BookDto> search(
@@ -54,12 +58,14 @@ public class BookController {
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Delete book by id", description = "Delete book by id")
     public void deleteById(@PathVariable Long id) {
         bookService.deleteById(id);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Update book info by id", description = "Update book info by id")
     public BookDto update(
             @RequestBody
@@ -71,6 +77,7 @@ public class BookController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Create book", description = "Create a new book")
     public BookDto save(@RequestBody @Valid CreateBookRequestDto requestDto) {
         return bookService.save(requestDto);

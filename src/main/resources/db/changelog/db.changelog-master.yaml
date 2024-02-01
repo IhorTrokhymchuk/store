@@ -13,3 +13,12 @@ databaseChangeLog:
 
   - include:
       file: db/changelog/changes/05-create-users_roles-table.yaml
+
+  - include:
+      file: db/changelog/changes/06-insert-roles-to-roles-table.yaml
+
+  - include:
+      file: db/changelog/changes/07-add-column-roles-to-users-table.yaml
+
+  - include:
+      file: db/changelog/changes/08-insert-two-users-to-users-table.yaml
