@@ -1,0 +1,18 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-column-roles-to-users-table
+      author: IhorTrokhymchuk
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: users_roles
+            baseColumnNames: role_id
+            referencedTableName: roles
+            referencedColumnNames: id
+            constraintName: FK_users_roles_roles
+
+        - addForeignKeyConstraint:
+            baseTableName: users_roles
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: FK_users_roles_users
