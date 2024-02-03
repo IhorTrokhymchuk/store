@@ -22,3 +22,9 @@ databaseChangeLog:
 
   - include:
       file: db/changelog/changes/08-insert-two-users-to-users-table.yaml
+
+  - include:
+      file: db/changelog/changes/create-categories-table.yaml
+
+  - include:
+      file: db/changelog/changes/create-books_categories-table.yaml
