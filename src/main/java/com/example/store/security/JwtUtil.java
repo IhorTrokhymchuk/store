@@ -3,23 +3,25 @@ package com.example.store.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 import java.util.function.Function;
+import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class JwtUtil {
-    private final Key secret;
+    private static final String ALGORITHM_NAME = "HmacSHA256";
+    private Key secret;
 
     @Value("${jwt.expiration}")
     private long expiration;
 
     public JwtUtil(@Value("${jwt.secret}") String secretString) {
-        secret = Keys.hmacShaKeyFor(secretString.getBytes(StandardCharsets.UTF_8));
+        this.secret =
+                new SecretKeySpec(secretString.getBytes(StandardCharsets.UTF_8), ALGORITHM_NAME);
     }
 
     public String generateToken(String email) {
@@ -35,7 +37,7 @@ public class JwtUtil {
         Jws<Claims> claimsJws = Jwts.parser()
                 .setSigningKey(secret)
                 .build()
-                .parseSignedClaims(token);
+                .parseClaimsJws(token);
         return !claimsJws.getBody().getExpiration().before(new Date());
     }
 
