@@ -10,6 +10,7 @@ import com.example.store.model.Book;
 import com.example.store.repository.book.BookRepository;
 import com.example.store.repository.book.BookSpecificationBuilder;
 import com.example.store.service.BookService;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -34,6 +35,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    @Transactional
     public BookDto findById(Long id) {
         Book book = bookRepository.findById(id).orElseThrow(()
                 -> new EntityNotFoundException("Cant find book by id: " + id)
@@ -42,6 +44,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    @Transactional
     public List<BookDto> search(Pageable pageable,
                                 BookSearchParametersDto bookSearchParametersDto) {
         Specification<Book> bookSpecification
@@ -50,7 +53,7 @@ public class BookServiceImpl implements BookService {
                 .map(bookMapper::toDto)
                 .toList();
         if (bookDtoList.isEmpty()) {
-            throw new EntityNotFoundException("Cant find books with parametrs: "
+            throw new EntityNotFoundException("Cant find books with parameters: "
                 + bookSearchParametersDto.toString());
         }
         return bookDtoList;
@@ -66,12 +69,13 @@ public class BookServiceImpl implements BookService {
         Book book = bookRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Cant find book by id: " + id)
         );
-        BeanUtils.copyProperties(requestDto, book, "id", "isDeleted");
+        BeanUtils.copyProperties(bookMapper.toModel(requestDto), book, "id", "isDeleted");
         bookRepository.save(book);
         return bookMapper.toDto(book);
     }
 
     @Override
+    @Transactional
     public List<BookDto> findAll(Pageable pageable) {
         List<BookDto> bookDtoList = bookRepository.findAll(pageable).stream()
                 .map(bookMapper::toDto)
