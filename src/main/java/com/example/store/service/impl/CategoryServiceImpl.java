@@ -31,9 +31,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDto findById(Long id) {
-        return categoryMapper.toDto(categoryRepository.findById(id).orElseThrow(
-                () -> new EntityNotFoundException("Can't find category by id: " + id)
-        ));
+        return categoryMapper.toDto(getCategoryById(id));
     }
 
     @Override
@@ -43,9 +41,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDto update(Long id, CreateCategoryRequestDto requestDto) {
-        Category category = categoryRepository.findById(id).orElseThrow(
-                () -> new EntityNotFoundException("Can't find category by id: " + id)
-        );
+        Category category = getCategoryById(id);
         BeanUtils.copyProperties(requestDto, category, "id", "is_deleted");
         categoryRepository.save(category);
         return categoryMapper.toDto(category);
@@ -57,7 +53,7 @@ public class CategoryServiceImpl implements CategoryService {
                 .map(categoryMapper::toDto)
                 .toList();
         if (categoryDtoList.isEmpty()) {
-            throw new EntityNotFoundException("Can't find category in db");
+            throw new EntityNotFoundException("Can't find categories in db");
         }
         return categoryDtoList;
     }
@@ -65,12 +61,18 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<BookDtoWithoutCategoryIds> getBooksByCategory(Long id, Pageable pageable) {
         List<BookDtoWithoutCategoryIds> allByCategoriesId =
-                bookRepository.findAllByCategoriesId(id, pageable).stream()
+                bookRepository.findAllByCategoryId(id, pageable).stream()
                 .map(bookMapper::toBookDtoWithoutCategoryIds)
                 .toList();
         if (allByCategoriesId.isEmpty()) {
-            throw new EntityNotFoundException("Can't find category in db");
+            throw new EntityNotFoundException("Can't find books by category where id: " + id);
         }
         return allByCategoriesId;
+    }
+
+    private Category getCategoryById(Long id) {
+        return categoryRepository.findById(id).orElseThrow(
+                () -> new EntityNotFoundException("Can't find category by id: " + id)
+        );
     }
 }
