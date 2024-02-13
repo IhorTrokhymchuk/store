@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findUserByEmail(String email);
 
-    @Query("SELECT u FROM User u INNER JOIN FETCH u.roles r WHERE u.email = :email")
+    @Query("SELECT u FROM User u JOIN FETCH u.roles WHERE u.email = :email")
     Optional<User> findUserByEmailWithRoles(String email);
+
 }

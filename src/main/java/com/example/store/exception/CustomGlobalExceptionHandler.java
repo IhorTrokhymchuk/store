@@ -51,6 +51,12 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
         return getObjectResponseEntity(ex.getMessage(), HttpStatus.NO_CONTENT);
     }
 
+    @ExceptionHandler(UnauthorizedModificationException.class)
+    public ResponseEntity<Object> handleCustomException(UnauthorizedModificationException ex,
+                                                        WebRequest request) {
+        return getObjectResponseEntity(ex.getMessage(), HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(RegistrationException.class)
     public ResponseEntity<Object> handleCustomException(RegistrationException ex,
                                                         WebRequest request) {
