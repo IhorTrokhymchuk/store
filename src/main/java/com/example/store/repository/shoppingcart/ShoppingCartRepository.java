@@ -1,7 +1,6 @@
 package com.example.store.repository.shoppingcart;
 
 import com.example.store.model.ShoppingCart;
-import com.example.store.model.User;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

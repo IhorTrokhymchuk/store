@@ -11,10 +11,9 @@ import com.example.store.repository.user.UserRepository;
 import com.example.store.service.CartItemService;
 import com.example.store.service.ShoppingCartService;
 import jakarta.transaction.Transactional;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -48,8 +47,10 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
                 shoppingCartRepository.findShoppingCartAndCartItemByUserEmail(email);
 
         return existingShoppingCart.orElseGet(
-                () -> createShoppingCart(userRepository.findUserByEmail(email).orElseThrow(
-                () -> new EntityNotFoundException("Cant find user with email: " + email)
+                () -> createShoppingCart(userRepository.findUserByEmail(email)
+                        .orElseThrow(
+                                () -> new EntityNotFoundException("Cant find user with email: "
+                                        + email)
         )));
     }
 

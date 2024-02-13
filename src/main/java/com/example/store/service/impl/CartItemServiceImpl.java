@@ -6,17 +6,15 @@ import com.example.store.dto.cartitem.CartItemUpdateRequestDto;
 import com.example.store.exception.EntityNotFoundException;
 import com.example.store.exception.UnauthorizedModificationException;
 import com.example.store.mapper.CartItemMapper;
-import com.example.store.model.Book;
 import com.example.store.model.CartItem;
 import com.example.store.model.ShoppingCart;
 import com.example.store.repository.book.BookRepository;
 import com.example.store.repository.cartitem.CartItemRepository;
 import com.example.store.service.CartItemService;
 import jakarta.transaction.Transactional;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
