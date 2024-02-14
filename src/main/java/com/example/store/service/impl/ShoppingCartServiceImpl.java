@@ -32,9 +32,8 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     @Transactional
     public ShoppingCartDto addItemToShoppingCart(CartItemRequestDto requestDto, String email) {
         ShoppingCart shoppingCart = getShoppingCart(email);
-        shoppingCart.getCartItems().add(cartItemService.save(requestDto, shoppingCart));
-        shoppingCartRepository.save(shoppingCart);
-        return shoppingCartMapper.toDto(shoppingCart);
+        shoppingCart.getCartItems().add(cartItemService.addOrUpdateCartItem(requestDto, shoppingCart));
+        return shoppingCartMapper.toDto(shoppingCartRepository.save(shoppingCart));
     }
 
     @Override
@@ -46,12 +45,10 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         Optional<ShoppingCart> existingShoppingCart =
                 shoppingCartRepository.findShoppingCartAndCartItemByUserEmail(email);
 
-        return existingShoppingCart.orElseGet(
-                () -> createShoppingCart(userRepository.findUserByEmail(email)
-                        .orElseThrow(
-                                () -> new EntityNotFoundException("Cant find user with email: "
-                                        + email)
-        )));
+        return existingShoppingCart.orElseGet(() -> createShoppingCart(
+                userRepository.findUserByEmail(email).orElseThrow(
+                        () -> new EntityNotFoundException("Cant find user with email: " + email)))
+        );
     }
 
     private ShoppingCart createShoppingCart(User user) {

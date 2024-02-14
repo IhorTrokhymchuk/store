@@ -34,9 +34,9 @@ public class ShoppingCartController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('USER')")
-    @Operation(summary = "Get all categories",
-            description = "Get a page of all available categories and can use sort")
-    public ShoppingCartDto getAll(Authentication authentication, Pageable pageable) {
+    @Operation(summary = "Get shopping cart",
+            description = "Get a shopping cart with all cart items")
+    public ShoppingCartDto getAll(Authentication authentication) {
         return shoppingCartService.findShoppingCart(authentication.getName());
     }
 

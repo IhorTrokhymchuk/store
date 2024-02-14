@@ -6,6 +6,7 @@ import com.example.store.dto.cartitem.CartItemUpdateRequestDto;
 import com.example.store.exception.EntityNotFoundException;
 import com.example.store.exception.UnauthorizedModificationException;
 import com.example.store.mapper.CartItemMapper;
+import com.example.store.model.Book;
 import com.example.store.model.CartItem;
 import com.example.store.model.ShoppingCart;
 import com.example.store.repository.book.BookRepository;
@@ -24,23 +25,25 @@ public class CartItemServiceImpl implements CartItemService {
     private final BookRepository bookRepository;
 
     @Override
-    public CartItem save(CartItemRequestDto requestDto, ShoppingCart shoppingCart) {
+    @Transactional
+    public CartItem addOrUpdateCartItem(CartItemRequestDto requestDto, ShoppingCart shoppingCart) {
         Optional<CartItem> existingCartItem = shoppingCart.getCartItems().stream()
                 .filter(cartItem -> cartItem.getBook().getId().equals(requestDto.getBookId()))
                 .findFirst();
-
+        CartItem cartItem;
         if (existingCartItem.isPresent()) {
-            CartItem cartItemToUpdate = existingCartItem.get();
-            cartItemToUpdate.setQuantity(requestDto.getQuantity());
-            return cartItemRepository.save(cartItemToUpdate);
+            cartItem = existingCartItem.get();
+            cartItem.setQuantity(requestDto.getQuantity());
         } else {
-            CartItem cartItem = cartItemMapper.toModel(requestDto);
-            cartItem.setBook(bookRepository.findById(requestDto.getBookId())
-                    .orElseThrow(() -> new EntityNotFoundException("Can't find book with id: "
-                            + requestDto.getBookId())));
+            cartItem = cartItemMapper.toModel(requestDto);
+            Book book = bookRepository.findById(requestDto.getBookId()).orElseThrow(
+                    () -> new EntityNotFoundException("Can't find book with id: "
+                            + requestDto.getBookId())
+            );
+            cartItem.setBook(book);
             cartItem.setShoppingCart(shoppingCart);
-            return cartItemRepository.save(cartItem);
         }
+        return cartItemRepository.save(cartItem);
     }
 
     @Override

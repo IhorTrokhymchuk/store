@@ -38,6 +38,6 @@ public class ShoppingCart {
             inverseJoinColumns = @JoinColumn(name = "cart_items_id")
     )
     private Set<CartItem> cartItems = new HashSet<>();
-    @Column(name = "is_deleted",nullable = false)
+    @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
 }

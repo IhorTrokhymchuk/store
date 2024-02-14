@@ -7,7 +7,7 @@ import com.example.store.model.CartItem;
 import com.example.store.model.ShoppingCart;
 
 public interface CartItemService {
-    CartItem save(CartItemRequestDto requestDto, ShoppingCart shoppingCart);
+    CartItem addOrUpdateCartItem(CartItemRequestDto requestDto, ShoppingCart shoppingCart);
 
     CartItemDto update(CartItemUpdateRequestDto requestDto, Long cartItemId, String email);
 

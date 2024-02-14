@@ -11,4 +11,3 @@ public interface ShoppingCartService {
 
     ShoppingCartDto findShoppingCart(String email);
 }
-
