@@ -1,6 +1,5 @@
 package com.example.store.dto.cartitem;
 
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
