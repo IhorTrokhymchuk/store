@@ -9,7 +9,9 @@ import com.example.store.model.Role;
 import com.example.store.model.User;
 import com.example.store.repository.role.RoleRepository;
 import com.example.store.repository.user.UserRepository;
+import com.example.store.service.ShoppingCartService;
 import com.example.store.service.UserService;
+import jakarta.transaction.Transactional;
 import java.util.HashSet;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +25,10 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
+    private final ShoppingCartService shoppingCartService;
 
     @Override
+    @Transactional
     public UserResponseDto register(UserRegistrationRequestDto requestDto)
             throws RegistrationException {
         if (userRepository.findUserByEmail(requestDto.getEmail()).isPresent()) {
@@ -43,6 +47,8 @@ public class UserServiceImpl implements UserService {
         Set<Role> roles = new HashSet<>();
         roles.add(roleRepository.findRoleByRole(Role.RoleName.USER));
         newUser.setRoles(roles);
-        return userMapper.toDto(userRepository.save(newUser));
+        userRepository.save(newUser);
+        shoppingCartService.registerNewShoppingCart(newUser);
+        return userMapper.toDto(newUser);
     }
 }

@@ -46,8 +46,8 @@ public class BookController {
 
     @GetMapping("/search")
     @PreAuthorize("hasAuthority('USER')")
-    @Operation(summary = "Get books by parametrs",
-            description = "Get a page of available books by parametrs and can use sort")
+    @Operation(summary = "Get books by parameters",
+            description = "Get a page of available books by parameters and can use sort")
     public List<BookDto> search(
             Pageable pageable,
             @Valid
