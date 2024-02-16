@@ -38,6 +38,15 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     @Override
+    @Transactional
+    public ShoppingCartDto cleanCart(String email) {
+        ShoppingCart shoppingCart = getShoppingCart(email);
+        cartItemService.deleteAllByUserShoppingCart(shoppingCart);
+        shoppingCart.getCartItems().clear();
+        return shoppingCartMapper.toDto(shoppingCartRepository.save(shoppingCart));
+    }
+
+    @Override
     public ShoppingCartDto findShoppingCart(String email) {
         return shoppingCartMapper.toDto(getShoppingCart(email));
     }

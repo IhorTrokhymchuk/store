@@ -37,3 +37,6 @@ databaseChangeLog:
 
   - include:
       file: db/changelog/changes/create-order-order_items-tables.yaml
+
+  - include:
+      file: db/changelog/changes/insert-status-to-order_status-table.yaml

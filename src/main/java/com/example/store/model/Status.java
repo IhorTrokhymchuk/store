@@ -13,7 +13,7 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "order_status")
-public class OrderStatus {
+public class Status {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,15 +22,12 @@ public class OrderStatus {
             unique = true,
             columnDefinition = "varchar")
     @Enumerated(EnumType.STRING)
-    private OrderStatus.StatusName status;
-
-    public String getStatus() {
-        return status.name();
-    }
+    private StatusName status;
 
     public enum StatusName {
-        USER,
-        ADMIN
+        COMPLETED,
+        PENDING,
+        DELIVERED
     }
 
 }

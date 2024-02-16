@@ -14,6 +14,7 @@ import com.example.store.repository.cartitem.CartItemRepository;
 import com.example.store.service.CartItemService;
 import jakarta.transaction.Transactional;
 import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,15 @@ public class CartItemServiceImpl implements CartItemService {
     private final CartItemRepository cartItemRepository;
     private final CartItemMapper cartItemMapper;
     private final BookRepository bookRepository;
+
+    @Override
+    public Set<CartItem> getAllByUserEmail(String email) {
+        Set<CartItem> cartItems = cartItemRepository.getAllByShoppingCartUserEmail(email);
+        if (cartItems.isEmpty()) {
+            throw new EntityNotFoundException("Cant find cart item where user email: " + email);
+        }
+        return cartItems;
+    }
 
     @Override
     @Transactional
@@ -59,6 +69,11 @@ public class CartItemServiceImpl implements CartItemService {
     public void deleteById(Long cartItemId, String email) {
         checkUserPermissionForCartItemModification(cartItemId, email);
         cartItemRepository.deleteById(cartItemId);
+    }
+
+    @Override
+    public void deleteAllByUserShoppingCart(ShoppingCart shoppingCart) {
+        cartItemRepository.deleteAllByShoppingCart(shoppingCart);
     }
 
     private CartItem checkUserPermissionForCartItemModification(Long cartItemId, String email) {

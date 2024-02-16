@@ -112,7 +112,7 @@ databaseChangeLog:
             baseTableName: orders_order_items
             baseColumnNames: order_id
             constraintName: fk_orders_order_items_order
-            referencedTableName: shopping_carts
+            referencedTableName: orders
             referencedColumnNames: id
             onDelete: CASCADE
 
@@ -124,6 +124,6 @@ databaseChangeLog:
             baseTableName: orders_order_items
             baseColumnNames: order_items_id
             constraintName: fk_orders_order_items_order_items
-            referencedTableName: cart_items
+            referencedTableName: order_items
             referencedColumnNames: id
             onDelete: CASCADE

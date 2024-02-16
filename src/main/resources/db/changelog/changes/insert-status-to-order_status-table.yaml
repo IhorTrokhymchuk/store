@@ -1,0 +1,49 @@
+databaseChangeLog:
+  - changeSet:
+      id: insert-status-to-order_status-table
+      author: IhorTrokhymchuk
+      changes:
+        - preConditions:
+              onFail: CONTINUE
+              sqlCheck:
+                expectedResult: 0
+                sql: SELECT COUNT(*) FROM order_status WHERE status = 'COMPLETED'
+          insert:
+            tableName: order_status
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: 1
+              - column:
+                  name: status
+                  value: COMPLETED
+
+        - preConditions:
+            onFail: CONTINUE
+            sqlCheck:
+              expectedResult: 0
+              sql: SELECT COUNT(*) FROM order_status WHERE status = 'PENDING'
+          insert:
+            tableName: order_status
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: 2
+              - column:
+                  name: status
+                  value: PENDING
+
+        - preConditions:
+            onFail: CONTINUE
+            sqlCheck:
+              expectedResult: 0
+              sql: SELECT COUNT(*) FROM order_status WHERE status = 'DELIVERED'
+          insert:
+            tableName: order_status
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: 3
+              - column:
+                  name: status
+                  value: DELIVERED
