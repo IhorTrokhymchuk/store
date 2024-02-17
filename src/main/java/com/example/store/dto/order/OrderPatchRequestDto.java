@@ -1,4 +1,8 @@
 package com.example.store.dto.order;
 
-public record OrderPatchRequestDto(String status) {
+import lombok.Data;
+
+@Data
+public class OrderPatchRequestDto {
+    private String status;
 }

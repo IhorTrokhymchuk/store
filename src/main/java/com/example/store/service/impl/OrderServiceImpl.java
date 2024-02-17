@@ -44,11 +44,11 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public OrderDto save(OrderRequestDto requestDto, String email) {
-        addShippingAddressIfExist(email, requestDto.shippingAddress());
+        addShippingAddressIfExist(email, requestDto.getShippingAddress());
         Order order = new Order();
         order.setUser(getUserByEmail(email));
         order.setStatus(orderStatusRepository.findStatusByStatus(Status.StatusName.PENDING));
-        order.setShippingAddress(requestDto.shippingAddress());
+        order.setShippingAddress(requestDto.getShippingAddress());
         order.setTotal(BigDecimal.ZERO);
         orderRepository.save(order);
         Set<OrderItem> orderItems = getOrderItemsFromCartByEmail(email, order);
@@ -61,7 +61,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderDto updateStatus(OrderPatchRequestDto requestDto, Long orderId) {
         Order order = findOrderById(orderId);
-        String statusValue = requestDto.status();
+        String statusValue = requestDto.getStatus();
         Status.StatusName statusName = Status.StatusName.valueOf(statusValue);
         order.setStatus(orderStatusRepository.findStatusByStatus(statusName));
         return orderMapper.toDto(orderRepository.save(order));
