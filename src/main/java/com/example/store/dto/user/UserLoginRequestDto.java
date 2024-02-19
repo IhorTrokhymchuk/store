@@ -2,6 +2,12 @@ package com.example.store.dto.user;
 
 import com.example.store.validation.EmailValues;
 import com.example.store.validation.PasswordValues;
+import lombok.Data;
 
-public record UserLoginRequestDto(@EmailValues String email, @PasswordValues String password) {
+@Data
+public class UserLoginRequestDto {
+    @EmailValues
+    private String email;
+    @PasswordValues
+    private String password;
 }

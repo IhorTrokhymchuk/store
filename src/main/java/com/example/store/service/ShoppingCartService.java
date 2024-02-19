@@ -10,4 +10,6 @@ public interface ShoppingCartService {
     ShoppingCartDto addItemToShoppingCart(CartItemRequestDto requestDto, String email);
 
     ShoppingCartDto findShoppingCart(String email);
+
+    ShoppingCartDto cleanCart(String email);
 }
