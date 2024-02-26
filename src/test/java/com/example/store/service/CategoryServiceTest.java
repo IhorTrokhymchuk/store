@@ -51,8 +51,8 @@ class CategoryServiceTest {
     @Test
     @DisplayName("verify save method to save valid data")
     void save_SavedValidData_ShouldReturnValid() {
-        String testName = "testName";
-        String testDescription = "testDescription";
+        String testName = "testNameValid";
+        String testDescription = "testDescriptionValid";
 
         CreateCategoryRequestDto requestDto = new CreateCategoryRequestDto();
         requestDto.setName(testName);
@@ -73,8 +73,8 @@ class CategoryServiceTest {
         CategoryDto savedDto = categoryService.save(requestDto);
 
         assertNotNull(savedDto);
-        assertEquals(savedDto.getName(), expectedDto.getName());
-        assertEquals(savedDto.getDescription(), expectedDto.getDescription());
+        assertEquals(expectedDto.getName(), savedDto.getName());
+        assertEquals(expectedDto.getDescription(), savedDto.getDescription());
 
         verify(categoryMapper).toModel(requestDto);
         verify(categoryRepository).save(category);

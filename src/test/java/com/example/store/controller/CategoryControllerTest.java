@@ -3,47 +3,45 @@ package com.example.store.controller;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.example.store.config.CustomMySqlContainer;
 import com.example.store.dto.category.CategoryDto;
 import com.example.store.dto.category.CreateCategoryRequestDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.sql.Connection;
+import java.sql.SQLException;
+import javax.sql.DataSource;
+import lombok.SneakyThrows;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureMockMvc
-@Testcontainers
 class CategoryControllerTest {
-    @Container
-    private static final CustomMySqlContainer MY_SQL_CONTAINER = CustomMySqlContainer.getInstance();
     private static MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
 
     @BeforeAll
-    static void beforeAll(@Autowired WebApplicationContext applicationContext) {
-        MY_SQL_CONTAINER.start();
+    static void beforeAll(@Autowired WebApplicationContext applicationContext,
+                          @Autowired DataSource dataSource) {
+        teardown(dataSource);
         mockMvc = MockMvcBuilders
                 .webAppContextSetup(applicationContext)
                 .apply(springSecurity())
@@ -51,15 +49,17 @@ class CategoryControllerTest {
     }
 
     @BeforeEach
-    @Sql(scripts = "classpath:database/delete-all-data.sql")
-    void setUp() {
-    }
-
-    @DynamicPropertySource
-    static void postgresqlProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", MY_SQL_CONTAINER::getJdbcUrl);
-        registry.add("spring.datasource.username", MY_SQL_CONTAINER::getUsername);
-        registry.add("spring.datasource.password", MY_SQL_CONTAINER::getPassword);
+    void setUp(@Autowired DataSource dataSource) throws SQLException {
+        teardown(dataSource);
+        try (Connection connection = dataSource.getConnection()) {
+            connection.setAutoCommit(true);
+            ScriptUtils.executeSqlScript(connection,
+                    new ClassPathResource(
+                            "database/category/add-categories-to-categories-table.sql"));
+            ScriptUtils.executeSqlScript(connection,
+                    new ClassPathResource(
+                            "database/books/add-books-with-any-categories-to-book-table.sql"));
+        }
     }
 
     @Test
@@ -95,10 +95,6 @@ class CategoryControllerTest {
     @Test
     @DisplayName("Update category by id")
     @WithMockUser(username = "admin", authorities = {"ADMIN"})
-    @Sql(scripts = "classpath:database/category/insert-test-category.sql",
-            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "classpath:database/category/delete-test-category.sql",
-            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void update_UpdateCategory_ShouldReturnUpdatedCategoryDto() throws Exception {
         Long categoryId = 1L;
         String updatedName = "UpdatedName";
@@ -125,8 +121,67 @@ class CategoryControllerTest {
         assertEquals(updatedDescription, resultDto.getDescription());
     }
 
+    @Test
+    @DisplayName("Update category by id with out authorities")
+    @WithMockUser(username = "user", authorities = {"USER"})
+    void update_UpdateCategoryWithoutPermission_ShouldReturnForbidden() throws Exception {
+        Long categoryId = 1L;
+        String updatedName = "UpdatedName";
+        String updatedDescription = "UpdatedDescription";
+
+        CreateCategoryRequestDto updateRequestDto = new CreateCategoryRequestDto();
+        updateRequestDto.setName(updatedName);
+        updateRequestDto.setDescription(updatedDescription);
+
+        String jsonRequest = objectMapper.writeValueAsString(updateRequestDto);
+
+        MvcResult result = mockMvc.perform(put("/categories/{id}", categoryId)
+                        .content(jsonRequest)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden())
+                .andReturn();
+    }
+
+    @Test
+    @DisplayName("Delete category by id")
+    @WithMockUser(username = "admin", authorities = {"ADMIN"})
+    void deleteById_DeleteCategory_ShouldReturnNoContent() throws Exception {
+        Long categoryIdToDelete = 1L;
+
+        MvcResult result = mockMvc.perform(delete("/categories/{id}", categoryIdToDelete)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent())
+                .andReturn();
+    }
+
+    @Test
+    @DisplayName("Delete category by id with out authorities")
+    @WithMockUser(username = "user", authorities = {"USER"})
+    void deleteById_DeleteCategoryWithoutPermission_ShouldReturnForbidden() throws Exception {
+        Long categoryIdToDelete = 1L;
+
+        MvcResult result = mockMvc.perform(delete("/categories/{id}", categoryIdToDelete)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden())
+                .andReturn();
+    }
+
     @AfterEach
-    @Sql(scripts = "classpath:database/delete-all-data.sql")
-    void tearDown() {
+    void tearDown(@Autowired DataSource dataSource) {
+        teardown(dataSource);
+    }
+
+    @SneakyThrows
+    static void teardown(DataSource dataSource) {
+        try (Connection connection = dataSource.getConnection()) {
+            connection.setAutoCommit(true);
+            ScriptUtils.executeSqlScript(connection,
+                    new ClassPathResource("database/delete-all-data.sql"));
+        }
+    }
+
+    @AfterAll
+    static void afterAll(@Autowired DataSource dataSource) {
+        teardown(dataSource);
     }
 }
