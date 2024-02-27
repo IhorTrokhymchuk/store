@@ -37,7 +37,13 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class BookControllerTest {
+class BookControllerIntegrationTest {
+    private static final String ADD_BOOKS_SCRIPT_PATH =
+            "database/books/add-books-with-any-categories-to-book-table.sql";
+    private static final String ADD_CATEGORIES_SCRIPT_PATH =
+            "database/category/add-categories-to-categories-table.sql";
+    private static final String DELETE_ALL_SCRIPT_PATH =
+            "database/delete-all-data.sql";
     private static MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
@@ -58,11 +64,9 @@ class BookControllerTest {
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(true);
             ScriptUtils.executeSqlScript(connection,
-                    new ClassPathResource(
-                            "database/category/add-categories-to-categories-table.sql"));
+                    new ClassPathResource(ADD_CATEGORIES_SCRIPT_PATH));
             ScriptUtils.executeSqlScript(connection,
-                    new ClassPathResource(
-                            "database/books/add-books-with-any-categories-to-book-table.sql"));
+                    new ClassPathResource(ADD_BOOKS_SCRIPT_PATH));
         }
     }
 
@@ -70,25 +74,17 @@ class BookControllerTest {
     @DisplayName("Create book with valid data")
     @WithMockUser(username = "admin", authorities = {"ADMIN"})
     void create_CreateBookWithValidData_ShouldReturnBookDto() throws Exception {
+        Long testId = 4L;
         String testTitle = "testTileValid";
         String testAuthor = "testAuthorValid";
         String testIsbn = "testIsbnValid";
         Set<Long> testCategoryIds = Set.of(1L, 2L);
         BigDecimal testPrice = BigDecimal.valueOf(3.99);
 
-        BookDto expectedDto = new BookDto();
-        expectedDto.setTitle(testTitle);
-        expectedDto.setAuthor(testAuthor);
-        expectedDto.setIsbn(testIsbn);
-        expectedDto.setCategoryIds(testCategoryIds);
-        expectedDto.setPrice(testPrice);
-
-        CreateBookRequestDto requestDto = new CreateBookRequestDto();
-        requestDto.setTitle(testTitle);
-        requestDto.setAuthor(testAuthor);
-        requestDto.setIsbn(testIsbn);
-        requestDto.setCategoryIds(testCategoryIds);
-        requestDto.setPrice(testPrice);
+        BookDto expectedDto = createExpectedBookDto(
+                testId, testTitle, testAuthor, testIsbn, testCategoryIds, testPrice);
+        CreateBookRequestDto requestDto = createCreateBookRequestDto(
+                testTitle, testAuthor, testIsbn, testCategoryIds, testPrice);
 
         String jsonRequest = objectMapper.writeValueAsString(requestDto);
 
@@ -101,12 +97,7 @@ class BookControllerTest {
         BookDto resultDto = objectMapper.readValue(
                 result.getResponse().getContentAsString(), BookDto.class);
 
-        assertNotNull(resultDto);
-        assertEquals(expectedDto.getTitle(), resultDto.getTitle());
-        assertEquals(expectedDto.getAuthor(), resultDto.getAuthor());
-        assertEquals(expectedDto.getIsbn(), resultDto.getIsbn());
-        assertEquals(expectedDto.getPrice(), resultDto.getPrice());
-        assertEquals(expectedDto.getCategoryIds(), resultDto.getCategoryIds());
+        assertBookDto(expectedDto, resultDto);
     }
 
     @Test
@@ -120,20 +111,10 @@ class BookControllerTest {
         Set<Long> updateCategoryIds = Set.of(1L);
         BigDecimal updatePrice = BigDecimal.valueOf(3.99);
 
-        BookDto expectedDto = new BookDto();
-        expectedDto.setId(testId);
-        expectedDto.setTitle(updateTitle);
-        expectedDto.setAuthor(updateAuthor);
-        expectedDto.setIsbn(updateIsbn);
-        expectedDto.setCategoryIds(updateCategoryIds);
-        expectedDto.setPrice(updatePrice);
-
-        CreateBookRequestDto requestDto = new CreateBookRequestDto();
-        requestDto.setTitle(updateTitle);
-        requestDto.setAuthor(updateAuthor);
-        requestDto.setIsbn(updateIsbn);
-        requestDto.setCategoryIds(updateCategoryIds);
-        requestDto.setPrice(updatePrice);
+        BookDto expectedDto = createExpectedBookDto(
+                testId, updateTitle, updateAuthor, updateIsbn, updateCategoryIds, updatePrice);
+        CreateBookRequestDto requestDto = createCreateBookRequestDto(
+                updateTitle, updateAuthor, updateIsbn, updateCategoryIds, updatePrice);
 
         String jsonRequest = objectMapper.writeValueAsString(requestDto);
 
@@ -146,13 +127,7 @@ class BookControllerTest {
         BookDto resultDto = objectMapper.readValue(
                 result.getResponse().getContentAsString(), BookDto.class);
 
-        assertNotNull(resultDto);
-        assertEquals(expectedDto.getId(), resultDto.getId());
-        assertEquals(expectedDto.getTitle(), resultDto.getTitle());
-        assertEquals(expectedDto.getAuthor(), resultDto.getAuthor());
-        assertEquals(expectedDto.getIsbn(), resultDto.getIsbn());
-        assertEquals(expectedDto.getPrice(), resultDto.getPrice());
-        assertEquals(expectedDto.getCategoryIds(), resultDto.getCategoryIds());
+        assertBookDto(expectedDto, resultDto);
     }
 
     @Test
@@ -182,13 +157,7 @@ class BookControllerTest {
         BookDto resultDto = objectMapper.readValue(
                 result.getResponse().getContentAsString(), BookDto.class);
 
-        assertNotNull(resultDto);
-        assertEquals(expectedDto.getId(), resultDto.getId());
-        assertEquals(expectedDto.getTitle(), resultDto.getTitle());
-        assertEquals(expectedDto.getAuthor(), resultDto.getAuthor());
-        assertEquals(expectedDto.getIsbn(), resultDto.getIsbn());
-        assertEquals(expectedDto.getPrice(), resultDto.getPrice());
-        assertEquals(expectedDto.getCategoryIds(), resultDto.getCategoryIds());
+        assertBookDto(expectedDto, resultDto);
     }
 
     @NotNull
@@ -209,6 +178,45 @@ class BookControllerTest {
         return expectedDto;
     }
 
+    private CreateBookRequestDto createCreateBookRequestDto(
+            String title, String author, String isbn, Set<Long> categoryIds, BigDecimal price) {
+        CreateBookRequestDto requestDto = new CreateBookRequestDto();
+        requestDto.setTitle(title);
+        requestDto.setAuthor(author);
+        requestDto.setIsbn(isbn);
+        requestDto.setCategoryIds(categoryIds);
+        requestDto.setPrice(price);
+        return requestDto;
+    }
+
+    private BookDto createExpectedBookDto(
+            Long id, String title, String author, String isbn,
+            Set<Long> categoryIds, BigDecimal price) {
+        BookDto expectedDto = new BookDto();
+        expectedDto.setId(id);
+        expectedDto.setTitle(title);
+        expectedDto.setAuthor(author);
+        expectedDto.setIsbn(isbn);
+        expectedDto.setCategoryIds(categoryIds);
+        expectedDto.setPrice(price);
+        return expectedDto;
+    }
+
+    private BookDto createExpectedBookDto(
+            String title, String author, String isbn, Set<Long> categoryIds, BigDecimal price) {
+        return createExpectedBookDto(null, title, author, isbn, categoryIds, price);
+    }
+
+    private void assertBookDto(BookDto expected, BookDto actual) {
+        assertNotNull(actual);
+        assertEquals(expected.getId(), actual.getId());
+        assertEquals(expected.getTitle(), actual.getTitle());
+        assertEquals(expected.getAuthor(), actual.getAuthor());
+        assertEquals(expected.getIsbn(), actual.getIsbn());
+        assertEquals(expected.getPrice(), actual.getPrice());
+        assertEquals(expected.getCategoryIds(), actual.getCategoryIds());
+    }
+
     @AfterEach
     void tearDown(@Autowired DataSource dataSource) {
         teardown(dataSource);
@@ -224,7 +232,7 @@ class BookControllerTest {
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(true);
             ScriptUtils.executeSqlScript(connection,
-                    new ClassPathResource("database/delete-all-data.sql"));
+                    new ClassPathResource(DELETE_ALL_SCRIPT_PATH));
         }
     }
 }

@@ -50,8 +50,7 @@ public class BookController {
             description = "Get a page of available books by parameters and can use sort")
     public List<BookDto> search(
             Pageable pageable,
-            @Valid
-            BookSearchParametersDto bookSearchParametersDto
+            @Valid BookSearchParametersDto bookSearchParametersDto
     ) {
         return bookService.search(pageable, bookSearchParametersDto);
     }

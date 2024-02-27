@@ -3,6 +3,7 @@ package com.example.store.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -49,32 +50,24 @@ class CategoryServiceTest {
     private CategoryServiceImpl categoryService;
 
     @Test
-    @DisplayName("verify save method to save valid data")
+    @DisplayName("Verify save method to save valid data")
     void save_SavedValidData_ShouldReturnValid() {
         String testName = "testNameValid";
         String testDescription = "testDescriptionValid";
 
         CreateCategoryRequestDto requestDto = new CreateCategoryRequestDto();
-        requestDto.setName(testName);
-        requestDto.setDescription(testDescription);
-
         Category category = new Category();
-        category.setName(testName);
-        category.setDescription(testDescription);
-
-        CategoryDto expectedDto = new CategoryDto();
-        expectedDto.setName(testName);
-        expectedDto.setDescription(testDescription);
+        CategoryDto expectedDto = createCategoryDto(testName, testDescription);
 
         when(categoryMapper.toModel(requestDto)).thenReturn(category);
         when(categoryRepository.save(category)).thenReturn(category);
         when(categoryMapper.toDto(category)).thenReturn(expectedDto);
 
-        CategoryDto savedDto = categoryService.save(requestDto);
+        CategoryDto result = categoryService.save(requestDto);
 
-        assertNotNull(savedDto);
-        assertEquals(expectedDto.getName(), savedDto.getName());
-        assertEquals(expectedDto.getDescription(), savedDto.getDescription());
+        assertNotNull(result);
+        assertEquals(expectedDto.getName(), result.getName());
+        assertEquals(expectedDto.getDescription(), result.getDescription());
 
         verify(categoryMapper).toModel(requestDto);
         verify(categoryRepository).save(category);
@@ -82,7 +75,7 @@ class CategoryServiceTest {
     }
 
     @Test
-    @DisplayName("verify findById method to find by valid id")
+    @DisplayName("Verify findById method to find by valid id")
     void findById_FindCategoryByValidId_ShouldReturnValidCategoryDto() {
         Long testCategoryId = 1L;
 
@@ -102,9 +95,9 @@ class CategoryServiceTest {
     }
 
     @Test
-    @DisplayName("verify findById method to find by non valid id")
+    @DisplayName("Verify findById method to find by non valid id")
     void findById_FindCategoryByNonValidId_ShouldThrowException() {
-        Long testCategoryId = Long.MAX_VALUE;
+        Long testCategoryId = -1L;
         when(categoryRepository.findById(testCategoryId)).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class,
@@ -115,7 +108,7 @@ class CategoryServiceTest {
     }
 
     @Test
-    @DisplayName("verify deleteById method to delete by id")
+    @DisplayName("Verify deleteById method to delete by id")
     void deleteById_deleteCategoryByValidId_ShouldDeleteCategory() {
         Long categoryId = 1L;
 
@@ -125,37 +118,27 @@ class CategoryServiceTest {
     }
 
     @Test
-    @DisplayName("verify update method to update by id")
+    @DisplayName("Verify update method to update by id")
     void update_UpdateCategoryWithValidId_ShouldReturnUpdateDto() {
         Long categoryId = 1L;
         String updateName = "UpdateName";
         String updateDescription = "UpdateDescription";
-        CreateCategoryRequestDto requestDto = new CreateCategoryRequestDto();
-        requestDto.setName(updateName);
-        requestDto.setDescription(updateDescription);
 
-        String testName = "TestName";
-        String testDescription = "TestDescription";
-        Category category = new Category(categoryId);
-        category.setId(categoryId);
-        category.setName(testName);
-        category.setDescription(testDescription);
-
-        CategoryDto expectedDto = new CategoryDto();
+        Category category = new Category();
+        CategoryDto expectedDto = createCategoryDto(updateName, updateDescription);
         expectedDto.setId(categoryId);
-        expectedDto.setName(updateName);
-        expectedDto.setDescription(updateDescription);
 
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
         when(categoryRepository.save(category)).thenReturn(category);
         when(categoryMapper.toDto(category)).thenReturn(expectedDto);
 
-        CategoryDto updatedDto = categoryService.update(categoryId, requestDto);
+        CreateCategoryRequestDto requestDto = new CreateCategoryRequestDto();
+        CategoryDto result = categoryService.update(categoryId, requestDto);
 
-        assertNotNull(updatedDto);
-        assertEquals(expectedDto.getId(), updatedDto.getId());
-        assertEquals(expectedDto.getName(), updatedDto.getName());
-        assertEquals(expectedDto.getDescription(), updatedDto.getDescription());
+        assertNotNull(result);
+        assertEquals(expectedDto.getId(), result.getId());
+        assertEquals(expectedDto.getName(), result.getName());
+        assertEquals(expectedDto.getDescription(), result.getDescription());
 
         verify(categoryRepository).findById(categoryId);
         verify(categoryRepository).save(category);
@@ -163,11 +146,9 @@ class CategoryServiceTest {
     }
 
     @Test
-    @DisplayName("verify update method to update by not valid id")
+    @DisplayName("Verify update method to update by not valid id")
     void update_UpdateCategoryWithNotValid_ShouldThrowException() {
         Long categoryId = 1L;
-
-        Category category = new Category(categoryId);
         CreateCategoryRequestDto requestDto = new CreateCategoryRequestDto();
 
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.empty());
@@ -180,8 +161,8 @@ class CategoryServiceTest {
     }
 
     @Test
-    @DisplayName("verify findAll method to give valid data")
-    void findAll_GetExistsData_ShouldReturnListCategoriesDto() {
+    @DisplayName("Verify findAll method to give valid data")
+    void findAll_GetExistentData_ShouldReturnListCategoriesDto() {
         Category category1 = new Category();
         Category category2 = new Category();
         Pageable pageable = PageRequest.of(0,10);
@@ -208,14 +189,16 @@ class CategoryServiceTest {
     }
 
     @Test
-    @DisplayName("verify findAll method to give empty data")
-    void findAll_IfDataIsNotExist_ShouldThrowException() {
+    @DisplayName("Verify findAll method to give empty data")
+    void findAll_IfDataIsNonexistentData_ShouldReturnEmptyList() {
         Pageable pageable = PageRequest.of(0,10);
         Page<Category> page = new PageImpl<>(List.of());
 
         when(categoryRepository.findAll(any(Pageable.class))).thenReturn(page);
 
-        assertThrows(EntityNotFoundException.class, () -> categoryService.findAll(pageable));
+        List<CategoryDto> result = categoryService.findAll(pageable);
+
+        assertTrue(result.isEmpty());
 
         verify(categoryRepository).findAll(any(Pageable.class));
         verify(categoryMapper, times(page.getContent().size())).toDto(any(Category.class));
@@ -223,8 +206,8 @@ class CategoryServiceTest {
     }
 
     @Test
-    @DisplayName("verify getBooksByCategory method to give valid data")
-    void getBooksByCategory_GetExistData_ShouldReturnListBookDto() {
+    @DisplayName("Verify getBooksByCategory method to give valid data")
+    void getBooksByCategory_GetExistentData_ShouldReturnListBookDto() {
         Long categoryId = 1L;
         Book firstDto = new Book();
         Book secondDto = new Book();
@@ -258,8 +241,8 @@ class CategoryServiceTest {
     }
 
     @Test
-    @DisplayName("verify getBooksByCategory method to give non exist data")
-    void getBooksByCategory_GetNonExistData_ShouldThrow() {
+    @DisplayName("Verify getBooksByCategory method to give non exist data")
+    void getBooksByCategory_GetNonexistentData_ShouldThrow() {
         Long categoryId = 1L;
 
         Pageable pageable = PageRequest.of(0,10);
@@ -272,5 +255,12 @@ class CategoryServiceTest {
         verify(bookRepository).findAllByCategoryId(categoryId, pageable);
         verify(bookMapper, times(0)).toBookDtoWithoutCategoryIds(any(Book.class));
         verifyNoMoreInteractions(bookRepository, bookMapper);
+    }
+
+    private CategoryDto createCategoryDto(String testName, String testDescription) {
+        CategoryDto expectedDto = new CategoryDto();
+        expectedDto.setName(testName);
+        expectedDto.setDescription(testDescription);
+        return expectedDto;
     }
 }

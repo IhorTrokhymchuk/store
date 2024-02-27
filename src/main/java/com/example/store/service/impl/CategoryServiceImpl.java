@@ -52,9 +52,6 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<CategoryDto> findAll(Pageable pageable) {
         Page<Category> categories = categoryRepository.findAll(pageable);
-        if (categories.isEmpty()) {
-            throw new EntityNotFoundException("Can't find categories in db");
-        }
         return categories.stream()
                 .map(categoryMapper::toDto)
                 .toList();

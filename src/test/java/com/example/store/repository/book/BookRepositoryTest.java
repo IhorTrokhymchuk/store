@@ -26,6 +26,11 @@ import org.springframework.jdbc.datasource.init.ScriptUtils;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class BookRepositoryTest {
+    private static final String ADD_BOOKS_SCRIPT_PATH =
+            "database/books/add-books-with-any-categories-to-book-table.sql";
+    private static final String ADD_CATEGORIES_SCRIPT_PATH =
+            "database/category/add-categories-to-categories-table.sql";
+    private static final String DELETE_ALL_SCRIPT_PATH = "database/delete-all-data.sql";
     @Autowired
     private BookRepository bookRepository;
 
@@ -35,16 +40,14 @@ class BookRepositoryTest {
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(true);
             ScriptUtils.executeSqlScript(connection,
-                    new ClassPathResource(
-                            "database/category/add-categories-to-categories-table.sql"));
+                    new ClassPathResource(ADD_CATEGORIES_SCRIPT_PATH));
             ScriptUtils.executeSqlScript(connection,
-                    new ClassPathResource(
-                            "database/books/add-books-with-any-categories-to-book-table.sql"));
+                    new ClassPathResource(ADD_BOOKS_SCRIPT_PATH));
         }
     }
 
     @Test
-    @DisplayName("verify find book by isbn method with valid data")
+    @DisplayName("Verify find book by isbn method with valid data")
     void findBookByIsbn_GetBookByIsbn_ShouldReturnOptionalOfBook() {
         String testIsbn = "TestBookIsbn1";
         Optional<Book> bookByIsbn = bookRepository.findBookByIsbn(testIsbn);
@@ -53,16 +56,16 @@ class BookRepositoryTest {
     }
 
     @Test
-    @DisplayName("verify find book by isbn method with not valid data")
-    void findBookByIsbn_GetBookBynNotValidIsbn_ShouldReturnEmptyOptionalOfBook() {
+    @DisplayName("Verify find book by isbn method with not valid data")
+    void findBookByIsbn_GetBookByNonexistentIsbn_ShouldReturnEmptyOptionalOfBook() {
         String testIsbn = "Non valid isbn";
         Optional<Book> bookByIsbn = bookRepository.findBookByIsbn(testIsbn);
         assertFalse(bookByIsbn.isPresent());
     }
 
     @Test
-    @DisplayName("verify find books by category method with valid category")
-    void findAllByCategoryId_GetBookByCategory_ShouldReturnBookWithValidCategory() {
+    @DisplayName("Verify find books by category method with valid category")
+    void findAllByCategoryId_GetBookByExistentCategoryId_ShouldReturnBookWithValidCategory() {
         Long categoryId = 1L;
         Pageable pageable = PageRequest.of(0, 10);
         List<Book> booksByCategoryId = bookRepository.findAllByCategoryId(categoryId, pageable);
@@ -75,8 +78,8 @@ class BookRepositoryTest {
     }
 
     @Test
-    @DisplayName("verify find books by category method with not existing book with need category")
-    void findAllByCategoryId_GetBookByCategory_ShouldReturnEmptyList() {
+    @DisplayName("Verify find books by category method with not existing book with need category")
+    void findAllByCategoryId_GetBookByNonexistentCategoryId_ShouldReturnEmptyList() {
         Long categoryId = 3L;
         Pageable pageable = PageRequest.of(0, 10);
         List<Book> booksByCategoryId = bookRepository.findAllByCategoryId(categoryId, pageable);
@@ -93,7 +96,7 @@ class BookRepositoryTest {
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(true);
             ScriptUtils.executeSqlScript(connection,
-                    new ClassPathResource("database/delete-all-data.sql"));
+                    new ClassPathResource(DELETE_ALL_SCRIPT_PATH));
         }
     }
 }

@@ -50,7 +50,7 @@ class BookServiceTest {
     private BookServiceImpl bookService;
 
     @Test
-    @DisplayName("verify save method to valid data")
+    @DisplayName("Verify save method to valid data")
     void save_SaveBook_ShouldReturnBookDto() {
         String testIsbn = "testIsbn";
 
@@ -83,7 +83,7 @@ class BookServiceTest {
     }
 
     @Test
-    @DisplayName("verify save method to not valid isbn")
+    @DisplayName("Verify save method to not valid isbn")
     void save_SaveBook_ShouldThrowException() {
         String testIsbn = "testIsbn";
 
@@ -105,7 +105,7 @@ class BookServiceTest {
     }
 
     @Test
-    @DisplayName("verify find by id method to valid id")
+    @DisplayName("Verify find by id method to valid id")
     void findById_FindBookById_ShouldReturnBookDto() {
         Long testId = 1L;
         Book book = new Book();
@@ -129,9 +129,9 @@ class BookServiceTest {
     }
 
     @Test
-    @DisplayName("verify find by id method to not valid id")
+    @DisplayName("Verify find by id method to not valid id")
     void findById_FindBookByIdWithNotValidId_ShouldThrowException() {
-        Long testId = 1L;
+        Long testId = -1L;
 
         when(bookRepository.findById(testId)).thenReturn(Optional.empty());
         assertThrows(EntityNotFoundException.class,
@@ -143,7 +143,7 @@ class BookServiceTest {
     }
 
     @Test
-    @DisplayName("verify find by id method to valid parameters")
+    @DisplayName("Verify find by id method to valid parameters")
     void search_FindBookByParameters_ShouldReturnListBookDto() {
         Pageable pageable = PageRequest.of(0, 10);
         BookSearchParametersDto searchParametersDto = new BookSearchParametersDto();
@@ -166,7 +166,7 @@ class BookServiceTest {
     }
 
     @Test
-    @DisplayName("verify find by id method to valid parameters")
+    @DisplayName("Verify find by id method to valid parameters")
     void search_FindBookByParameters_ShouldThrowException() {
         Pageable pageable = PageRequest.of(0, 10);
         BookSearchParametersDto searchParametersDto = new BookSearchParametersDto();
@@ -183,7 +183,7 @@ class BookServiceTest {
     }
 
     @Test
-    @DisplayName("verify deleteById method to delete by id")
+    @DisplayName("Verify deleteById method to delete by id")
     void deleteById_deleteBookByValidId_ShouldDeleteCategory() {
         Long categoryId = 1L;
 
@@ -193,8 +193,8 @@ class BookServiceTest {
     }
 
     @Test
-    @DisplayName("verify findAll method returns all books")
-    void findAll_WithExistingBooks_ReturnsBookDtoList() {
+    @DisplayName("Verify findAll method returns all books")
+    void findAll_WithExistentBooks_ReturnsBookDtoList() {
         Book book1 = new Book();
         Book book2 = new Book();
         Pageable pageable = PageRequest.of(0,10);
@@ -204,18 +204,7 @@ class BookServiceTest {
         when(bookMapper.toDto(any(Book.class))).thenAnswer(
                 invocation -> {
                     Book book = invocation.getArgument(0);
-                    BookDto bookDto = new BookDto();
-                    bookDto.setId(book.getId());
-                    bookDto.setTitle(book.getTitle());
-                    bookDto.setAuthor(book.getAuthor());
-                    bookDto.setIsbn(book.getIsbn());
-                    bookDto.setPrice(book.getPrice());
-                    bookDto.setCategoryIds(book.getCategories().stream()
-                            .map(Category::getId)
-                            .collect(Collectors.toSet()));
-                    bookDto.setDescription(book.getDescription());
-                    bookDto.setCoverImage(book.getCoverImage());
-                    return bookDto;
+                    return mapperInvocation(book);
                 }
         );
 
@@ -229,8 +218,8 @@ class BookServiceTest {
     }
 
     @Test
-    @DisplayName("verify findAll method returns all books")
-    void findAll_WithNonExistingBooks_ShouldThrowException() {
+    @DisplayName("Verify findAll method returns all books")
+    void findAll_WithNonexistentBooks_ShouldThrowException() {
         Pageable pageable = PageRequest.of(0,10);
         Page<Book> page = new PageImpl<>(List.of());
         when(bookRepository.findAll(any(Pageable.class))).thenReturn(page);
@@ -240,5 +229,20 @@ class BookServiceTest {
 
         verify(bookRepository).findAll(any(Pageable.class));
         verifyNoMoreInteractions(bookRepository, bookMapper);
+    }
+
+    private BookDto mapperInvocation(Book book) {
+        BookDto bookDto = new BookDto();
+        bookDto.setId(book.getId());
+        bookDto.setTitle(book.getTitle());
+        bookDto.setAuthor(book.getAuthor());
+        bookDto.setIsbn(book.getIsbn());
+        bookDto.setPrice(book.getPrice());
+        bookDto.setCategoryIds(book.getCategories().stream()
+                .map(Category::getId)
+                .collect(Collectors.toSet()));
+        bookDto.setDescription(book.getDescription());
+        bookDto.setCoverImage(book.getCoverImage());
+        return bookDto;
     }
 }

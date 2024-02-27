@@ -33,7 +33,13 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class CategoryControllerTest {
+class CategoryControllerIntegrationTest {
+    private static final String ADD_BOOKS_SCRIPT_PATH =
+            "database/books/add-books-with-any-categories-to-book-table.sql";
+    private static final String ADD_CATEGORIES_SCRIPT_PATH =
+            "database/category/add-categories-to-categories-table.sql";
+    private static final String DELETE_ALL_SCRIPT_PATH =
+            "database/delete-all-data.sql";
     private static MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
@@ -55,10 +61,10 @@ class CategoryControllerTest {
             connection.setAutoCommit(true);
             ScriptUtils.executeSqlScript(connection,
                     new ClassPathResource(
-                            "database/category/add-categories-to-categories-table.sql"));
+                            ADD_CATEGORIES_SCRIPT_PATH));
             ScriptUtils.executeSqlScript(connection,
                     new ClassPathResource(
-                            "database/books/add-books-with-any-categories-to-book-table.sql"));
+                            ADD_BOOKS_SCRIPT_PATH));
         }
     }
 
@@ -69,13 +75,10 @@ class CategoryControllerTest {
         String testName = "TestName";
         String testDescription = "TestDescription";
 
-        CategoryDto expectedDto = new CategoryDto();
-        expectedDto.setName(testName);
-        expectedDto.setDescription(testDescription);
+        CategoryDto expectedDto = createCategoryDto(testName, testDescription);
+        CreateCategoryRequestDto requestDto =
+                createCategoryRequestDtoDto(testName, testDescription);
 
-        CreateCategoryRequestDto requestDto = new CreateCategoryRequestDto();
-        requestDto.setName(testName);
-        requestDto.setDescription(testDescription);
         String jsonRequest = objectMapper.writeValueAsString(requestDto);
 
         MvcResult result = mockMvc.perform(post("/categories")
@@ -100,9 +103,8 @@ class CategoryControllerTest {
         String updatedName = "UpdatedName";
         String updatedDescription = "UpdatedDescription";
 
-        CreateCategoryRequestDto updateRequestDto = new CreateCategoryRequestDto();
-        updateRequestDto.setName(updatedName);
-        updateRequestDto.setDescription(updatedDescription);
+        CreateCategoryRequestDto updateRequestDto =
+                createCategoryRequestDtoDto(updatedName, updatedDescription);
 
         String jsonRequest = objectMapper.writeValueAsString(updateRequestDto);
 
@@ -129,9 +131,8 @@ class CategoryControllerTest {
         String updatedName = "UpdatedName";
         String updatedDescription = "UpdatedDescription";
 
-        CreateCategoryRequestDto updateRequestDto = new CreateCategoryRequestDto();
-        updateRequestDto.setName(updatedName);
-        updateRequestDto.setDescription(updatedDescription);
+        CreateCategoryRequestDto updateRequestDto =
+                createCategoryRequestDtoDto(updatedName, updatedDescription);
 
         String jsonRequest = objectMapper.writeValueAsString(updateRequestDto);
 
@@ -166,6 +167,20 @@ class CategoryControllerTest {
                 .andReturn();
     }
 
+    private CategoryDto createCategoryDto(String name, String description) {
+        CategoryDto categoryDto = new CategoryDto();
+        categoryDto.setName(name);
+        categoryDto.setDescription(description);
+        return categoryDto;
+    }
+
+    private CreateCategoryRequestDto createCategoryRequestDtoDto(String name, String description) {
+        CreateCategoryRequestDto categoryRequestDtoDto = new CreateCategoryRequestDto();
+        categoryRequestDtoDto.setName(name);
+        categoryRequestDtoDto.setDescription(description);
+        return categoryRequestDtoDto;
+    }
+
     @AfterEach
     void tearDown(@Autowired DataSource dataSource) {
         teardown(dataSource);
@@ -176,7 +191,7 @@ class CategoryControllerTest {
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(true);
             ScriptUtils.executeSqlScript(connection,
-                    new ClassPathResource("database/delete-all-data.sql"));
+                    new ClassPathResource(DELETE_ALL_SCRIPT_PATH));
         }
     }
 
