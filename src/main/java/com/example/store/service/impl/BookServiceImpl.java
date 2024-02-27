@@ -14,6 +14,7 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -49,14 +50,16 @@ public class BookServiceImpl implements BookService {
                                 BookSearchParametersDto bookSearchParametersDto) {
         Specification<Book> bookSpecification
                 = bookSpecificationBuilder.build(bookSearchParametersDto);
-        List<BookDto> bookDtoList = bookRepository.findAll(bookSpecification, pageable).stream()
+
+        Page<Book> bookList = bookRepository.findAll(bookSpecification, pageable);
+
+        if (bookList.isEmpty()) {
+            throw new EntityNotFoundException("Cant find books with parameters: "
+                + bookSearchParametersDto);
+        }
+        return bookList.stream()
                 .map(bookMapper::toDto)
                 .toList();
-        if (bookDtoList.isEmpty()) {
-            throw new EntityNotFoundException("Cant find books with parameters: "
-                + bookSearchParametersDto.toString());
-        }
-        return bookDtoList;
     }
 
     @Override
@@ -69,7 +72,8 @@ public class BookServiceImpl implements BookService {
         Book book = bookRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Cant find book by id: " + id)
         );
-        BeanUtils.copyProperties(bookMapper.toModel(requestDto), book, "id", "isDeleted");
+        Book model = bookMapper.toModel(requestDto);
+        BeanUtils.copyProperties(model, book, "id", "isDeleted");
         bookRepository.save(book);
         return bookMapper.toDto(book);
     }
@@ -77,12 +81,12 @@ public class BookServiceImpl implements BookService {
     @Override
     @Transactional
     public List<BookDto> findAll(Pageable pageable) {
-        List<BookDto> bookDtoList = bookRepository.findAll(pageable).stream()
-                .map(bookMapper::toDto)
-                .toList();
+        Page<Book> bookDtoList = bookRepository.findAll(pageable);
         if (bookDtoList.isEmpty()) {
             throw new EntityNotFoundException("Cant find books");
         }
-        return bookDtoList;
+        return bookDtoList.stream()
+                .map(bookMapper::toDto)
+                .toList();
     }
 }

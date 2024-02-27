@@ -50,8 +50,7 @@ public class BookController {
             description = "Get a page of available books by parameters and can use sort")
     public List<BookDto> search(
             Pageable pageable,
-            @Valid
-            BookSearchParametersDto bookSearchParametersDto
+            @Valid BookSearchParametersDto bookSearchParametersDto
     ) {
         return bookService.search(pageable, bookSearchParametersDto);
     }
@@ -74,6 +73,7 @@ public class BookController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('ADMIN')")
+    @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create book", description = "Create a new book")
     public BookDto save(@RequestBody @Valid CreateBookRequestDto requestDto) {
         return bookService.save(requestDto);

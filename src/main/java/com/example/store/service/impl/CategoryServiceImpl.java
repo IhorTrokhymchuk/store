@@ -6,6 +6,7 @@ import com.example.store.dto.category.CreateCategoryRequestDto;
 import com.example.store.exception.EntityNotFoundException;
 import com.example.store.mapper.BookMapper;
 import com.example.store.mapper.CategoryMapper;
+import com.example.store.model.Book;
 import com.example.store.model.Category;
 import com.example.store.repository.book.BookRepository;
 import com.example.store.repository.category.CategoryRepository;
@@ -13,6 +14,7 @@ import com.example.store.service.CategoryService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -49,25 +51,23 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryDto> findAll(Pageable pageable) {
-        List<CategoryDto> categoryDtoList = categoryRepository.findAll(pageable).stream()
+        Page<Category> categories = categoryRepository.findAll(pageable);
+        return categories.stream()
                 .map(categoryMapper::toDto)
                 .toList();
-        if (categoryDtoList.isEmpty()) {
-            throw new EntityNotFoundException("Can't find categories in db");
-        }
-        return categoryDtoList;
     }
 
     @Override
     public List<BookDtoWithoutCategoryIds> getBooksByCategory(Long id, Pageable pageable) {
-        List<BookDtoWithoutCategoryIds> allByCategoriesId =
-                bookRepository.findAllByCategoryId(id, pageable).stream()
-                .map(bookMapper::toBookDtoWithoutCategoryIds)
-                .toList();
-        if (allByCategoriesId.isEmpty()) {
+        List<Book> allByCategoryId = bookRepository.findAllByCategoryId(id, pageable);
+
+        if (allByCategoryId.isEmpty()) {
             throw new EntityNotFoundException("Can't find books by category where id: " + id);
         }
-        return allByCategoriesId;
+
+        return allByCategoryId.stream()
+                .map(bookMapper::toBookDtoWithoutCategoryIds)
+                .toList();
     }
 
     private Category getCategoryById(Long id) {
